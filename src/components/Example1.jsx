@@ -1,24 +1,33 @@
 import { useState, useRef, useCallback } from "react";
 import usePosts from "../hooks/usePosts";
 import Post from "./Post";
+import useDebounce from "../hooks/useDebounce";
 
 const Example1 = () => {
   const [pageNum, setPageNum] = useState(1);
-  const { results, isError, isLoading, hasNextPage, error } = usePosts(pageNum);
-  const intObserver = useRef(); //intersection observer
-  const lastPostRef = useCallback((post) => {
-    if (isLoading) return;
+  const debouncedPageNum = useDebounce(pageNum, 1000);
+  const { results, isError, isLoading, hasNextPage, error } =
+    usePosts(debouncedPageNum);
+  //useRef() creates a reference object (intObserver) to store the IntersectionObserver instance.
+  //intersection observer
+  const intObserver = useRef();
 
-    if (intObserver.current) intObserver.current.disconnect();
+  const lastPostRef = useCallback(
+    (post) => {
+      if (isLoading) return;
 
-    intObserver.current = new IntersectionObserver((posts) => {
-      if (posts[0].isIntersecting && hasNextPage) {
-        console.log(`We are near the last post !`);
-        setPageNum((prev) => prev + 1);
-      }
-    });
-    if (post) intObserver.current.observe(post);
-  }, [isLoading,hasNextPage]);
+      if (intObserver.current) intObserver.current.disconnect();
+
+      intObserver.current = new IntersectionObserver((posts) => {
+        if (posts[0].isIntersecting && hasNextPage) {
+          console.log(`We are near the last post !`);
+          setPageNum((prev) => prev + 1);
+        }
+      });
+      if (post) intObserver.current.observe(post);
+    },
+    [isLoading, hasNextPage]
+  );
 
   if (isError) return <p className="text-red-500">Error:{error}</p>;
 
