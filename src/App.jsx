@@ -1,7 +1,8 @@
 import "./App.css";
+import Example1 from "./components/Example1";
 
 function App() {
-  return <div className="font-bold">Hello</div>;
+  return <Example1/>;
 }
 
 export default App;
