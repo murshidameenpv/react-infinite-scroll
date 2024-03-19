@@ -12,10 +12,11 @@ const Example2 = () => {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery({
-    queryKey: ["/posts"],
-    queryFn: ({ pageParams = 1 }) => getPostsPage(pageParams),
+    queryKey: ["posts"],
+    queryFn: ({ pageParam = 1 }) => getPostsPage(pageParam),
     getNextPageParam: (lastPage, allPages) => {
-      return lastPage.length ? allPages.length + 1 : undefined;
+      const morePagesExist = lastPage.length === 10; // assuming 10 is the number of posts per page
+      return morePagesExist ? allPages.length + 1 : undefined;
     },
   });
 
@@ -24,7 +25,7 @@ const Example2 = () => {
   const lastPostRef = useCallback(
     (post) => {
       if (isFetchingNextPage) return;
-
+      //clear previous stored intersection obeserver intance
       if (intObserver.current) intObserver.current.disconnect();
 
       intObserver.current = new IntersectionObserver((posts) => {
